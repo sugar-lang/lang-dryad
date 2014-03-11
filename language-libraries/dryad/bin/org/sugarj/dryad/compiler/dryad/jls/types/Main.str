@@ -1,0 +1,17 @@
+/**
+ * Types
+ *
+ * @author Martin Bravenboer <martin@cs.uu.nl>
+ */
+module org/sugarj/dryad/compiler/dryad/jls/types/Main
+imports
+  org/sugarj/dryad/compiler/dryad/jls/types/Erasure
+  org/sugarj/dryad/compiler/dryad/jls/types/Lub
+  org/sugarj/dryad/compiler/dryad/jls/types/Parameterized
+  org/sugarj/dryad/compiler/dryad/jls/types/Primitive  
+  org/sugarj/dryad/compiler/dryad/jls/types/Raw  
+  org/sugarj/dryad/compiler/dryad/jls/types/Reference  
+  org/sugarj/dryad/compiler/dryad/jls/types/Reifiable  
+  org/sugarj/dryad/compiler/dryad/jls/types/Subtyping  
+
+

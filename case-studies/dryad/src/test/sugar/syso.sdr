@@ -1,0 +1,31 @@
+package test.sugar;
+import org.sugarj.languages.Dryad;
+import org.sugarj.languages.SugarDryad;
+
+sugar syso{
+	
+	rules
+		desugar-syso :
+			
+			ExprStm(
+                  Invoke(
+                    Method(MethodName(Id("syso")))
+                  , msg
+                  )
+                )
+                 ->
+                ExprStm(
+                  Invoke(
+                    Method(
+                      MethodName(
+                        AmbName(AmbName(Id("System")), Id("out"))
+                      , Id("println")
+                      )
+                    )
+                  , msg
+                  )
+                )
+                
+    desugarings
+    	desugar-syso
+}

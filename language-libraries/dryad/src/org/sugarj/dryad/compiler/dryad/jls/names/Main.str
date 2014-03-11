@@ -1,0 +1,13 @@
+/**
+ * Names
+ *
+ * @author Martin Bravenboer <martin@cs.uu.nl>
+ */
+module org/sugarj/dryad/compiler/dryad/jls/names/Main
+imports
+  org/sugarj/dryad/compiler/dryad/jls/names/AccessControl
+
+strategies
+
+  is-type-name =
+    ?TypeName(_, _)

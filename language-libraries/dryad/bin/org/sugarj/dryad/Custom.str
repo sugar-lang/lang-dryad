@@ -1,0 +1,179 @@
+module org/sugarj/dryad/Custom
+
+signature constructors
+  	Result : A -> B    
+	String : A -> B
+	Null : A
+	ClassImport : A * B * C -> D
+	Jar : Path -> Jar
+	DryadError : Msg * Code -> Error
+	
+	
+ signature constructors
+     	PackageName : A -> B
+     	PackageDec : A * B -> C
+     	CompilationUnit : A * B * C -> D
+     	ClassFile : A * B * C * D * E * F * G * H * I -> J
+     	Interface : A
+     	AccessFlags : A -> B
+     	ThisClass : A -> B
+     	Id : A -> B
+     	RootPackage : A
+     	InterfacePrefix : A -> B
+
+strategies
+	
+	//external definitions for Java-based strategies
+	
+	//execute static Java methods
+	external CallJavaStatic(|jars,classname,methodname)
+	//retrieve source path (of project when compiling)
+	external GetSourcePath(|)
+	//retrieve absolute file name for a ressource bundled with the Dryad plugin
+	external ResolveResource(|)
+	//throw an Exception
+	external ThrowException(|msg)
+	//get content of .jar file
+	external GetJarContent(|)
+
+	//Hook Helper
+	hasAnno(s) = where(getAnno(s))
+	getAnno(s) = has-annos; <fetch-elem(s)><get-annos>
+	setAnno(|a) = where(get-annos; (?l@[_|_] < ![a|l] + ![a]) => annos); <set-annos>(<id>,annos)
+	
+	//retrieve a list of .jar files which are required for calls to class2aterm and aterm2class
+  	getJars = id
+	    //create list auf .jar names
+    	; !["aterm.jar","aterm-java-1.8.2.jar","bcel-5.2.jar","IntermediateLanguage-1.0.jar","jjtraveler.jar","shared-objects.jar","aterm2class.jar"]
+	    //add folder prefix
+	    ; map(\x -> <concat-strings>["aterm2class/",x]\)
+	    //retrieve full path
+	    ; map(ResolveResource)
+
+	  //replace for jvm calls
+	strjvm-callstatic-new(|class,method) = id
+		//ensure argument term is a list of terms
+		; as-list
+		//wrap string values with Constructor String()
+		; map(try(\x -> String(x) where is-string\))
+		//get result
+		; CallJavaStatic(|<getJars>,class,method)
+		//fetch result and parse as term (if possible)
+		; (?Result(String(<read-from-string>)) +> ?Result(<id>))
+	
+	jdebug(what) = 
+		where(<concat-strings>["JDEBUG: ",<what>," - "] => str);
+		debug(!str)
+
+	processImport =	id
+	  //.class files cannot be imported using the native Dryad Compiler mechanism
+	  //as they need relative paths to detect package names
+	  //(foo/bar.class would detect 'foo' as package name)
+	  ; ?ClassImport(simplename,pkgname,path)
+      ; !ClassFile(path) => location
+      ; <parse-binary-name> simplename => parts
+      ; <lookup-or-add-package> pkgname => pkg
+      ; <private-classpath-handle-toplevel-class(|pkg)> parts
+      ; set-package(|pkg)
+      ; set-location(|location)	
+        
+        
+ 	processImport = id
+	  ; ?Jar(path)
+	  //get a list of .jar entries
+	  ; <GetJarContent> path
+  	  //call the regular import mechanism of Dryad Compiler
+	  ; map(\class -> <id> where explode-string; private-define-jar-entry(|path)\)
+
+	handleDryadError =
+		 ?DryadError(msg,<id>)
+		 ; ThrowException(|msg)
+		   
+	handleDryadError(|msg) = ThrowException(|msg)
+	
+	hook-dryad-init = fail
+	hook-dryad-final(|args) = fail
+	
+	hook-dryad-final(|args) = id => compiledTerm
+		 //fix interface names, do not repeat
+		 ; !args
+		 //check if package name is given
+		 ; ?[_,_,CompilationUnit(Some(PackageDec(_,PackageName(pkg))),_,_)]
+		 //check for existing, not-fixed interfaces
+		 ; <fetch-elem(where(?ClassFile(_,_,AccessFlags(<fetch-elem(?Interface())>),ThisClass(clsid),_,_,_,_,_);not(<is-substring(!".")>clsid)))> compiledTerm
+		 //extract package name
+		 ; <map(\Id(x) -> x\)>pkg
+		 ; separate-by(|".")
+		 ; <conc>(<id>,["."])
+		 ; concat-strings => interfacePrefix
+		 //map any interfaces	
+		 ;<map(try(
+		  	?ClassFile(_,_,AccessFlags(flags),_,_,_,_,_,_); //extract modifier flags
+		  	where(<fetch-elem(?Interface())>flags);			//check if interface
+		  	topdown(try(\ThisClass(x) -> ThisClass(<concat-strings>[interfacePrefix,x])\)) //fix name
+		  ))> compiledTerm
+		  
+	hook-dryad-init = 
+		//fix BC class files
+		?[path,imports,CompilationUnit(Some(PackageDec(_,PackageName(pkg))),_,[cls@ClassFile(_,_,_,_,_,_,_,_,_)])]
+		 ; where(get-annotations => annos)
+		 //extract package name
+		 ; <map(\Id(x) -> x\)>pkg
+		 ; separate-by(|".")
+		 ; <conc>(<id>,["."])
+		 ; concat-strings => interfacePrefix
+		 ; ![path,imports,cls]
+		 //restore annotations
+		 ; <set-annotations>(<id>,annos)
+		 ; setAnno(|InterfacePrefix(interfacePrefix))
+		
+	hook-dryad-final(|args) =
+		//fix BC class files
+		where(<getAnno(?(InterfacePrefix(<id>)))>args => prfx)
+		//check for repetitions
+		; where(not(hasAnno(?InterfacePrefix(_))))
+		; topdown(try(\ThisClass(x) -> ThisClass(<concat-strings>[prfx,x])\))
+		; setAnno(|InterfacePrefix(prfx))
+		
+	compileClass() = id
+		//cleanup old Dryad stuff
+		; where(
+			<hashtable-remove(|"fields")><table-hashtable>;
+			<hashtable-remove(|RootPackage())><table-hashtable>
+		)
+		; jdebug(!"compileClass called")
+		; repeat(hook-dryad-init)
+		; ?args@[path,imports,<id>]
+		//import files
+		//; ensure-import-observable-classes //Removed import from bundled rt.classes/rt.jar
+		; where(<map(processImport)>imports)
+		; as-list(map( // unassemble imported classfiles
+      		if(is-ClassFile, bc-unasm(handleDryadError))
+    	))
+    	; topdown(try(trace-terms-to-annos))
+    	; bc-unasm
+    	; as-list
+    	; map(define-compilation-unit)
+    	; dryad-reclassify
+    	; map(dryad-type-checker-mixed; get-ast)
+    	; as-list
+   		; dryad-emit(handleDryadError)
+   		; jdebug(!"Compilation succeeded!")
+   		; repeat(hook-dryad-final(|args))
+   		//check for path seperator
+   		; where((<string-ends-with(|"/")>path < !"/" + !"\\") => sep)
+   		; map(
+   		  	?cls@ClassFile(_,_,_,ThisClass(clsid),_,_,_,_,_);
+   		  	//modifiy path (unless a classfile is compiled, which is not encapsulated by a ComiplationUnit)
+   		  	if <string-ends-with(|".class")>path then
+   		  		!path => finalpath //BC class file, do not modify path
+   		  	else 
+   		  		<concat-strings>[path,<string-replace(|".",sep)>clsid,".class"] => finalpath
+   		  	end;
+   		  	![<write-to-string>cls,finalpath];
+   		  	//jdebug(!"writing class file");
+   		  	//verify result
+   		  	strjvm-callstatic-new(|"str.classtree.classify.ClassClassifier","convertAndExport") => Null();
+   		  	!finalpath
+   		)
+		; jdebug(!"Class file written")

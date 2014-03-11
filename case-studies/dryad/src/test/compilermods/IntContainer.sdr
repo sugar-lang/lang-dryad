@@ -1,0 +1,11 @@
+package test.compilermods;
+import test.compilermods.IntInterface;
+public class IntContainer implements IntInterface{
+	private int field;
+	public IntContainer(int field){
+		this.field = field;
+	}
+	public int intValue(){
+		return field;
+	}
+}
