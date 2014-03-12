@@ -1,4 +1,0 @@
-module org/sugarj/dryad/initGrammar
-imports org/sugarj/languages/SugarDryad
-        org/sugarj/stdlib/Common
-        

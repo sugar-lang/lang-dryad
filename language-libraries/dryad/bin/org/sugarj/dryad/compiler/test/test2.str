@@ -1,5 +1,0 @@
-module test/test2
-rules
-	somerule : CompilationUnit(_,_,x) -> x
-strategies
-	somestrat = try(somerule)
