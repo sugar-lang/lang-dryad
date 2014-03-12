@@ -23,3 +23,5 @@ By being able to hook into the compilation process transformations can use the i
     		System.out.println(c); //50
 
 The *IntContainer* class extends that Interface, so its instances can be used wherever a regular *int* could be. If it is placed in an expression where an *int* is expected, the instance itself is replaced by the result of its *intValue()* method.
+
+**Please see the [example project](https://github.com/thewilli/lang-dryad/tree/master/case-studies/dryad/src) for additional use cases.**
