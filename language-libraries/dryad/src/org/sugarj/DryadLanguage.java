@@ -27,7 +27,7 @@ public class DryadLanguage extends ExtendedAbstractBaseLanguage {
 
   @Override
   public String getVersion() {
-    return "dryad-0.2";
+    return "dryad-1.1";
   }
 
   @Override

@@ -1,18 +1,20 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: org.sugarj.dryad
-Bundle-SymbolicName: org.sugarj.dryad;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Name: org.sugarj.language.dryad
+Bundle-SymbolicName: org.sugarj.language.dryad;singleton:=true
+Bundle-Version: 1.1.0.qualifier
 Bundle-Activator: org.sugarj.dryad.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.sugarj.common,
  org.spoofax.terms,
  org.strategoxt.strj,
- org.sugarj.baselang;bundle-version="1.2.0",
- org.spoofax.jsglr;bundle-version="1.2.0"
+ org.sugarj.baselang,
+ org.spoofax.jsglr
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Export-Package: org.sugarj
+Export-Package: org.sugarj,
+ org.sugarj.languages,
+ org.sugarj.strategies
 Eclipse-RegisterBuddy: org.sugarj.languagelib
 Bundle-ClassPath: .
