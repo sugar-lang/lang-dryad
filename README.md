@@ -13,15 +13,33 @@ By being able to hook into the compilation process transformations can use the i
 
 [This example](https://github.com/thewilli/lang-dryad/blob/master/case-studies/dryad/src/test/compilermods/CompilerModTest1.sdr) uses type information to allow the usage of classes that implement a certain [Interface](https://github.com/thewilli/lang-dryad/blob/master/case-studies/dryad/src/test/compilermods/IntInterface.sdr) to be used instead of *int* values:
 
+
 ```java
-IntContainer cont1 = new IntContainer(2);
-IntContainer cont2 = new IntContainer(7);
-IntContainer cont3 = new IntContainer(3);
-int a,b,c;
-a = cont1;
-b = 2 + cont2 * cont1 - cont3;
-c = a * (b + cont2 + 5);
-System.out.println(c); //50
+//Interface
+public interface IntInterface{
+	public int intValue();
+}
+//Simple implementation
+public class IntContainer implements IntInterface{
+	private int field;
+	public IntContainer(int field){
+		this.field = field;
+	}
+	public int intValue(){
+		return field;
+	}
+}
+//How to use it
+void test(){
+  IntContainer cont1 = new IntContainer(2);
+  IntContainer cont2 = new IntContainer(7);
+  IntContainer cont3 = new IntContainer(3);
+  int a,b,c;
+  a = cont1;
+  b = 2 + cont2 * cont1 - cont3;
+  c = a * (b + cont2 + 5);
+  System.out.println(c); //50
+}
 ```
 
 The *IntContainer* class extends that Interface, so its instances can be used wherever a regular *int* could be. If it is placed in an expression where an *int* is expected, the instance itself is replaced by the result of its *intValue()* method.
