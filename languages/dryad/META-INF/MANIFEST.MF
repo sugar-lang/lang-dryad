@@ -18,3 +18,4 @@ Export-Package: org.sugarj,
  org.sugarj.strategies
 Eclipse-RegisterBuddy: org.sugarj.languagelib
 Bundle-ClassPath: .
+Eclipse-BundleShape: dir
