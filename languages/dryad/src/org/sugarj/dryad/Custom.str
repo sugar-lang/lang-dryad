@@ -20,6 +20,12 @@ signature constructors
      	Id : A -> B
      	RootPackage : A
      	InterfacePrefix : A -> B
+     	ClassDec : A * B -> C
+		SingleElemAnno : A * B -> C
+		ClassDecHead : A * B * C * D * E -> F
+		TypeName : A -> B
+		Lit : A -> B
+		Chars : A -> B
 
 strategies
 	
@@ -100,7 +106,10 @@ strategies
 		 //check if package name is given
 		 ; ?[_,_,CompilationUnit(Some(PackageDec(_,PackageName(pkg))),_,_)]
 		 //check for existing, not-fixed interfaces
-		 ; <fetch-elem(where(?ClassFile(_,_,AccessFlags(<fetch-elem(?Interface())>),ThisClass(clsid),_,_,_,_,_);not(<is-substring(!".")>clsid)))> compiledTerm
+		 ; <fetch-elem(where(
+		   	?ClassFile(_,_,AccessFlags(<fetch-elem(?Interface())>),ThisClass(clsid),_,_,_,_,_);
+		   	not(<is-substring(!".")>clsid)
+		 ))> compiledTerm
 		 //extract package name
 		 ; <map(\Id(x) -> x\)>pkg
 		 ; separate-by(|".")
@@ -113,6 +122,38 @@ strategies
 		  	topdown(try(\ThisClass(x) -> ThisClass(<concat-strings>[interfacePrefix,x])\)) //fix name
 		  ))> compiledTerm
 		  
+	
+rules
+	//remove all Java annotations from the provided classes for those s succeeds
+	removeClassAnnos(s): CompilationUnit(a,b,types){t*} -> CompilationUnit(a,b,newTypes){t*} where
+		<map(try(removeClassAnnos(s)))> types => newTypes
+	
+	removeClassAnnos(s) : ClassDec(ClassDecHead(annos,a,b,c,d),e){t*} 
+		-> ClassDec(ClassDecHead(newannos,a,b,c,d),e){t*} where
+		<remove-all(s)>annos => newannos
+		
+strategies	
+
+	//use "LoadJar" annotation to add additional .jar file to buildpath
+	hook-dryad-init =
+		?[path,imports,type]{t*};
+		where(not(<getAllClassAnnos>type => []));
+		<makeConc>(imports,<generateJarList>type) => newImports;
+		![path,newImports,<removeClassAnnos(?SingleElemAnno(TypeName(Id("LoadJar")),_))>type]{t*} 
+	
+	//get all class annotations of current Java class(es)
+	getAllClassAnnos =
+		?CompilationUnit(_,_,<filter(?ClassDec(_,_))>);
+		map(?ClassDec(ClassDecHead(<filter(?SingleElemAnno(_,_))>,_,_,_,_),_));
+		flatten-list
+	
+	//generate list of .jar files to import from @LoadJar annotations
+	generateJarList = 
+		<filter (?SingleElemAnno(TypeName(Id("LoadJar")),_))><getAllClassAnnos <+ ![]>;
+		jdebug(!"filter result");
+		map(\SingleElemAnno(TypeName(Id("LoadJar")),Lit(String([Chars(jarname)]))) -> Jar(<GetSourcePath>jarname)\)
+		  
+	
 	hook-dryad-init = 
 		//fix BC class files
 		?[path,imports,CompilationUnit(Some(PackageDec(_,PackageName(pkg))),_,[cls@ClassFile(_,_,_,_,_,_,_,_,_)])]
