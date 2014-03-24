@@ -46,6 +46,7 @@ strategies
 	hasAnno(s) = where(getAnno(s))
 	getAnno(s) = has-annos; <fetch-elem(s)><get-annos>
 	setAnno(|a) = where(get-annos; (?l@[_|_] < ![a|l] + ![a]) => annos); <set-annos>(<id>,annos)
+	removeAnno(s) = <set-annos>(<id>,<remove-all(s)><get-annos>)
 	
 	//retrieve a list of .jar files which are required for calls to class2aterm and aterm2class
   	getJars = id
@@ -137,7 +138,7 @@ strategies
 	//use "LoadJar" annotation to add additional .jar file to buildpath
 	hook-dryad-init =
 		?[path,imports,type]{t*};
-		where(not(<getAllClassAnnos>type => []));
+		where(<fetch-elem(?SingleElemAnno(TypeName(Id("LoadJar")),_))><getAllClassAnnos>);
 		<makeConc>(imports,<generateJarList>type) => newImports;
 		![path,newImports,<removeClassAnnos(?SingleElemAnno(TypeName(Id("LoadJar")),_))>type]{t*} 
 	

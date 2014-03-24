@@ -1,5 +1,6 @@
 package test.compilermods;
 import test.compilermods.stringmod;
+@PrefixString("myprefix")
 public class CompilerModTest2{
 	public static void main(String[] args){
 		//the test.compilermods.stringmod Sugar Library

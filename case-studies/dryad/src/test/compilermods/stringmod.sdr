@@ -4,53 +4,24 @@ import org.sugarj.languages.SugarDryad;
 sugar stringmod{
 	
 	signature constructors
-		HDF : Nothing
+		PrefixString : A -> B
 	
 	strategies
 
 		hook-dryad-final(|args) =
-			not(hasAnno(?HDF()));
-			topdown(try(\LDC(String(<id>)) -> LDC(String(<concat-strings>["prefix_",<id>]))\));
-			setAnno(|HDF())
+			not(hasAnno(?PrefixString(_)));
+			where(<getAnno(?PrefixString(prfx))>args);
+			topdown(try(\LDC(String(<id>)) -> LDC(String(<concat-strings>[prfx,"_",<id>]))\));
+			setAnno(|PrefixString(None()))
 
-	rules
-
-		isConvertableIntType : b@ExprName(_) -> <id>
-		where
-			type-attr => ClassType(tn,_);
-			where(
-				<lookup-class> tn;
-				get-superinterfaces(|<id>);
-				fetch-elem(?InterfaceType(TypeName(PackageName([Id("test"),Id("compilermods")]),Id("IntInterface")),None()))
-			)
-
-
-		convertIntType : b@ExprName(bname) -> c
-		where
-			isConvertableIntType;
-			<type-attr>b => type@ClassType(tn@TypeName(_,_),_);
-			!Invoke(
-				Method(
-					MethodName(
-						ExprName(bname){Type(type)},
-						Id("intValue")
-					)
-				),
-				[]
-			){Type(Int()),DeclaringClass(type),CompileTimeDeclaration(MethodName(tn,Id("intValue"),[],Int()))} => c
-
-		hook-dryad-emit-java(s) : Assign(target,val) -> c
-		where
-			<type-attr> target => Int();
-			<isConvertableIntType>val ;
-			<emit-java(s)>Assign(target,<convertIntType>val) => c
-
-	
-		hook-dryad-emit-java(s) : Plus(a,b) -> c
-		where
-			(<isConvertableIntType>a <+ <isConvertableIntType>b);
-			(<isConvertableIntType>a < !<convertIntType>a + !a) => a2;
-			(<isConvertableIntType>b < !<convertIntType>b + !b) => b2;
-			<emit-java(s)>Plus(a2,b2){Type(Int())} => c
-
+		hook-dryad-init =
+			?[path,imports,type]{t*};
+			jdebug(!"hdi1");
+			<fetch-elem(
+				?SingleElemAnno(TypeName(Id("PrefixString")),Lit(String([Chars(prfx)])))
+			)><getAllClassAnnos>type;
+			jdebug(!"hdi2");
+			![path,imports,<removeClassAnnos(?SingleElemAnno(TypeName(Id("PrefixString")),_))>type]{t*};
+			setAnno(|PrefixString(prfx))
+			; jdebug(!"hdi3")
 }
