@@ -3,9 +3,13 @@ import test.compilermods.stringmod;
 @PrefixString("myprefix")
 public class CompilerModTest2{
 	public static void main(String[] args){
-		//the test.compilermods.stringmod Sugar Library
-		//modifies all strings used on the 'LDC' command.
-		//It demonstrates how a hook can only be applied once
+		/*
+			the test.compilermods.stringmod Sugar Library
+			allows a Java class to specify a prefix by using
+			an annotation. This prefix is added to all literal
+			strings loaded with the 'LDC' instruction _after_
+			the compilation took place, just before the assembling.
+		*/
 		System.out.println("Hello Compilermods!!");
 		String a = "foo";
 		String b = "bar";

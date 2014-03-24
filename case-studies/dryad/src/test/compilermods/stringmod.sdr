@@ -8,20 +8,27 @@ sugar stringmod{
 	
 	strategies
 
-		hook-dryad-final(|args) =
-			not(hasAnno(?PrefixString(_)));
-			where(<getAnno(?PrefixString(prfx))>args);
-			topdown(try(\LDC(String(<id>)) -> LDC(String(<concat-strings>[prfx,"_",<id>]))\));
-			setAnno(|PrefixString(None()))
-
 		hook-dryad-init =
+			//get pataremter
 			?[path,imports,type]{t*};
-			jdebug(!"hdi1");
+			//check if any "PrefixString" annotation exists
 			<fetch-elem(
 				?SingleElemAnno(TypeName(Id("PrefixString")),Lit(String([Chars(prfx)])))
 			)><getAllClassAnnos>type;
-			jdebug(!"hdi2");
+			//remove all "PrefixString" annotations from Java class
 			![path,imports,<removeClassAnnos(?SingleElemAnno(TypeName(Id("PrefixString")),_))>type]{t*};
+			//add annotation to compiler arguments
 			setAnno(|PrefixString(prfx))
-			; jdebug(!"hdi3")
+
+		hook-dryad-final(|args) =
+			//check for prefix string information
+			where(<getAnno(?PrefixString(prfx))>args);
+			//ensure hook was not already called before
+			not(hasAnno(?PrefixString(_)));
+			//prefix all strings
+			topdown(try(\LDC(String(<id>)) -> LDC(String(<concat-strings>[prfx,"_",<id>]))\));
+			//add annotation to prevent multiple hook execution (endless loop)
+			setAnno(|PrefixString(None()))
+
+
 }

@@ -138,7 +138,7 @@ strategies
 	//use "LoadJar" annotation to add additional .jar file to buildpath
 	hook-dryad-init =
 		?[path,imports,type]{t*};
-		where(<fetch-elem(?SingleElemAnno(TypeName(Id("LoadJar")),_))><getAllClassAnnos>);
+		where(<fetch-elem(?SingleElemAnno(TypeName(Id("LoadJar")),_))><getAllClassAnnos>type);
 		<makeConc>(imports,<generateJarList>type) => newImports;
 		![path,newImports,<removeClassAnnos(?SingleElemAnno(TypeName(Id("LoadJar")),_))>type]{t*} 
 	
