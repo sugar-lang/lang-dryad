@@ -1,52 +1,19 @@
 module org/sugarj/dryad/Custom
-
-signature constructors
-  	Result : A -> B    
-	String : A -> B
-	Null : A
-	ClassImport : A * B * C -> D
-	Jar : Path -> Jar
-	DryadError : Msg * Code -> Error
-	
-	
- signature constructors
-     	PackageName : A -> B
-     	PackageDec : A * B -> C
-     	CompilationUnit : A * B * C -> D
-     	ClassFile : A * B * C * D * E * F * G * H * I -> J
-     	Interface : A
-     	AccessFlags : A -> B
-     	ThisClass : A -> B
-     	Id : A -> B
-     	RootPackage : A
-     	InterfacePrefix : A -> B
-     	ClassDec : A * B -> C
-		SingleElemAnno : A * B -> C
-		ClassDecHead : A * B * C * D * E -> F
-		TypeName : A -> B
-		Lit : A -> B
-		Chars : A -> B
+imports 
+	org/sugarj/dryad/Constructors
+	org/sugarj/EABP
+	org/sugarj/dryad/Hooks
 
 strategies
+
+	//Dryad-specific external definitions
 	
-	//external definitions for Java-based strategies
-	
-	//execute static Java methods
-	external CallJavaStatic(|jars,classname,methodname)
-	//retrieve source path (of project when compiling)
-	external GetSourcePath(|)
 	//retrieve absolute file name for a ressource bundled with the Dryad plugin
 	external ResolveResource(|)
-	//throw an Exception
-	external ThrowException(|msg)
 	//get content of .jar file
 	external GetJarContent(|)
 
-	//Hook Helper
-	hasAnno(s) = where(getAnno(s))
-	getAnno(s) = has-annos; <fetch-elem(s)><get-annos>
-	setAnno(|a) = where(get-annos; (?l@[_|_] < ![a|l] + ![a]) => annos); <set-annos>(<id>,annos)
-	removeAnno(s) = <set-annos>(<id>,<remove-all(s)><get-annos>)
+	//Dryad compilation
 	
 	//retrieve a list of .jar files which are required for calls to class2aterm and aterm2class
   	getJars = id
@@ -92,6 +59,7 @@ strategies
   	  //call the regular import mechanism of Dryad Compiler
 	  ; map(\class -> <id> where explode-string; private-define-jar-entry(|path)\)
 
+	//Dryad Errorhandling
 	handleDryadError =
 		 ?DryadError(msg,<id>)
 		 ; ThrowException(|msg)
@@ -124,59 +92,11 @@ strategies
 		  ))> compiledTerm
 		  
 	
-rules
-	//remove all Java annotations from the provided classes for those s succeeds
-	removeClassAnnos(s): CompilationUnit(a,b,types){t*} -> CompilationUnit(a,b,newTypes){t*} where
-		<map(try(removeClassAnnos(s)))> types => newTypes
-	
-	removeClassAnnos(s) : ClassDec(ClassDecHead(annos,a,b,c,d),e){t*} 
-		-> ClassDec(ClassDecHead(newannos,a,b,c,d),e){t*} where
-		<remove-all(s)>annos => newannos
+
 		
 strategies	
 
-	//use "LoadJar" annotation to add additional .jar file to buildpath
-	hook-dryad-init =
-		?[path,imports,type]{t*};
-		where(<fetch-elem(?SingleElemAnno(TypeName(Id("LoadJar")),_))><getAllClassAnnos>type);
-		<makeConc>(imports,<generateJarList>type) => newImports;
-		![path,newImports,<removeClassAnnos(?SingleElemAnno(TypeName(Id("LoadJar")),_))>type]{t*} 
-	
-	//get all class annotations of current Java class(es)
-	getAllClassAnnos =
-		?CompilationUnit(_,_,<filter(?ClassDec(_,_))>);
-		map(?ClassDec(ClassDecHead(<filter(?SingleElemAnno(_,_))>,_,_,_,_),_));
-		flatten-list
-	
-	//generate list of .jar files to import from @LoadJar annotations
-	generateJarList = 
-		<filter (?SingleElemAnno(TypeName(Id("LoadJar")),_))><getAllClassAnnos <+ ![]>;
-		jdebug(!"filter result");
-		map(\SingleElemAnno(TypeName(Id("LoadJar")),Lit(String([Chars(jarname)]))) -> Jar(<GetSourcePath>jarname)\)
-		  
-	
-	hook-dryad-init = 
-		//fix BC class files
-		?[path,imports,CompilationUnit(Some(PackageDec(_,PackageName(pkg))),_,[cls@ClassFile(_,_,_,_,_,_,_,_,_)])]
-		 ; where(get-annotations => annos)
-		 //extract package name
-		 ; <map(\Id(x) -> x\)>pkg
-		 ; separate-by(|".")
-		 ; <conc>(<id>,["."])
-		 ; concat-strings => interfacePrefix
-		 ; ![path,imports,cls]
-		 //restore annotations
-		 ; <set-annotations>(<id>,annos)
-		 ; setAnno(|InterfacePrefix(interfacePrefix))
-		
-	hook-dryad-final(|args) =
-		//fix BC class files
-		where(<getAnno(?(InterfacePrefix(<id>)))>args => prfx)
-		//check for repetitions
-		; where(not(hasAnno(?InterfacePrefix(_))))
-		; topdown(try(\ThisClass(x) -> ThisClass(<concat-strings>[prfx,x])\))
-		; setAnno(|InterfacePrefix(prfx))
-		
+	//dryad compilation Strategy
 	compileClass() = id
 		//cleanup old Dryad stuff
 		; where(
@@ -185,6 +105,7 @@ strategies
 		)
 		//; jdebug(!"compileClass called")
 		; repeat(hook-dryad-init)
+		//; jdebug(!"compileClass - hooks called")
 		; ?args@[path,imports,<id>]
 		//import files
 		//; ensure-import-observable-classes //Removed import from bundled rt.classes/rt.jar
