@@ -10,9 +10,9 @@ public class CompilerModTest2{
 			strings loaded with the 'LDC' instruction _after_
 			the compilation took place, just before the assembling.
 		*/
-		System.out.println("Hello Compilermods!!");
-		String a = "foo";
-		String b = "bar";
-		System.out.println(a + b);
+		System.out.println("Hello Compilermods!!"); //myprefix_Hello Compilermods!!
+		String a = "foo"; //myprefix_foo
+		String b = "bar"; //myprefix_bar
+		System.out.println(a + b); //myprefix_foomyprefix_bar
 	}
 }
