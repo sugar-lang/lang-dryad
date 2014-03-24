@@ -11,14 +11,21 @@ sugar includebuild{
 			; CallJavaStatic(|[],"java.lang.System","currentTimeMillis")
 			; ?Result(String(<id>))
 			; <concat-strings> [<id>,"L"]
+
+		getUserName = 
+			<CallJavaStatic(|[],"java.lang.System","getProperty")> [String("user.name")]
+			; ?Result(String(<id>))
+
 	rules
 
-		desugar-buildmethodCS : ClassBody(x) -> ClassBody([y|x])
+		desugar-buildmethodCS : ClassBody(x) -> ClassBody([y,z|x])
 			where
 				topdown(hasNotMethod);
-				!Lit(Deci(<getTimestamp>)) => z;
+				!Lit(Deci(<getTimestamp>)) => a;
+				!Lit(String([Chars(<getUserName>)])) => b;
 				//define new method using Concrete Object Syntax
-				!|[public static long getBuild(){return ~z;}]| => y
+				!|[public static long getBuild(){return ~a;}]| => y;
+				!|[public static String getUser(){return ~b;}]| => z
      
     	hasNotMethod : _ -> <id>
     		where
