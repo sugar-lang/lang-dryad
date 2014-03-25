@@ -3,7 +3,7 @@ module org/sugarj/dryad/Hooks
 //included dryad hooks
 
 strategies
-		//use "LoadJar" annotation to add additional .jar file to buildpath
+	//use "LoadJar" annotation to add additional .jar file to buildpath
 	hook-dryad-init =
 		?[path,imports,type]{t*};
 		where(<fetch-elem(?SingleElemAnno(TypeName(Id("LoadJar")),_))><getAllClassAnnos>type);
