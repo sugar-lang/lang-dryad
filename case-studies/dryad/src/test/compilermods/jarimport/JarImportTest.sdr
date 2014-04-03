@@ -1,0 +1,15 @@
+package test.compilermods.jarimport;
+import com.google.common.math.*;
+import java.math.BigInteger;
+import java.math.RoundingMode;
+@LoadJar("/test/compilermods/jarimport/guava-16.0.1.jar")
+public class JarImportTest{
+	//adopted for use from https://code.google.com/p/guava-libraries/wiki/MathExplained
+	//This example demonstrates how the annotation @LoadJar() can be used to add
+	//additional .jar files to the build path. The GetSourcePath Strategy is used
+	//to resolve the provided .jar path relative to the toplevel source directory
+	public static void main(String[] args){
+		BigInteger bigint = BigIntegerMath.sqrt(BigInteger.TEN.pow(99), RoundingMode.HALF_EVEN);
+		System.out.println(bigint); //31622776601683793319988935444327185337195551393252
+	}
+}

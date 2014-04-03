@@ -446,7 +446,7 @@ sugar DryadJasminIncludedSyntax{
   context-free restrictions
     LAYOUT? -/- [\ \t\n\r]
     //LAYOUT? -/- [\;] . [\ \t]
-    LAYOUT? -/- [\;] . [\n\r]
+    //LAYOUT? -/- [\;] . [\n\r]
 
 
   context-free syntax

@@ -31,6 +31,7 @@ public class GetSourcePath_0_0 extends Strategy{
 	  //if current term is a string append it (but prevent double separators)
 	  if(current.getTermType() == IStrategoTerm.STRING){
 		  String path = ((IStrategoString)current).stringValue();
+		  path = path.replace('/', File.separatorChar);
 		  if(path.startsWith(File.separator))
 			  path = path.substring(1);
 		  result += path;

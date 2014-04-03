@@ -14,13 +14,13 @@ import test.languages.jasmin.DryadJasmin;
 	System.out.println("Hello World!");
 }
 
-; Jasmin method definition
+// Jasmin method definition
 .method public static main([Ljava/lang/String;)V
          .limit stack 2
          getstatic java/lang/System/out Ljava/io/PrintStream;
          ldc "Hello World Jasmin!"
 		 invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
-		 ; inline Java in Jasmin method
+		 // inline Java in Jasmin method
 		 `[for(int i = 0; i < 5; i++) System.out.println("Loop output!");]
          return
 .end method

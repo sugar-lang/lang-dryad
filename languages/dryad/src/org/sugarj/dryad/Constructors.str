@@ -1,0 +1,27 @@
+module org/sugarj/dryad/Constructors
+
+signature constructors
+  	Result : A -> B    
+	String : A -> B
+	Null : A
+	ClassImport : A * B * C -> D
+	Jar : Path -> Jar
+	DryadError : Msg * Code -> Error
+	
+ signature constructors
+     	PackageName : A -> B
+     	PackageDec : A * B -> C
+     	CompilationUnit : A * B * C -> D
+     	ClassFile : A * B * C * D * E * F * G * H * I -> J
+     	Interface : A
+     	AccessFlags : A -> B
+     	ThisClass : A -> B
+     	Id : A -> B
+     	RootPackage : A
+     	InterfacePrefix : A -> B
+     	ClassDec : A * B -> C
+		SingleElemAnno : A * B -> C
+		ClassDecHead : A * B * C * D * E -> F
+		TypeName : A -> B
+		Lit : A -> B
+		Chars : A -> B

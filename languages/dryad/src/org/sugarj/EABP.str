@@ -1,0 +1,36 @@
+module org/sugarj/EABP
+//Stratego definitions for the ExtendedAbstractBaseProcessor
+strategies
+	
+	//external definitions for Java-based strategies
+	
+	//execute static Java methods
+	external CallJavaStatic(|jars,classname,methodname)
+	//retrieve source path (of project when compiling)
+	external GetSourcePath(|)
+	//throw an Exception
+	external ThrowException(|msg)
+	
+	//Hook Helper
+	hasAnno(s) = where(getAnno(s))
+	getAnno(s) = has-annos; <fetch-elem(s)><get-annos>
+	setAnno(|a) = where(get-annos; (?l@[_|_] < ![a|l] + ![a]) => annos); <set-annos>(<id>,annos)
+	removeAnno(s) = <set-annos>(<id>,<remove-all(s)><get-annos>)
+	
+	//annotation helper
+	
+	//get all class annotations of current Java class(es)
+	getAllClassAnnos =
+		?CompilationUnit(_,_,<filter(?ClassDec(_,_))>);
+		map(?ClassDec(ClassDecHead(<filter(?SingleElemAnno(_,_))>,_,_,_,_),_));
+		flatten-list
+	
+rules
+	
+	//remove all Java annotations from the provided classes for those s succeeds
+	removeClassAnnos(s): CompilationUnit(a,b,types){t*} -> CompilationUnit(a,b,newTypes){t*} where
+		<map(try(removeClassAnnos(s)))> types => newTypes
+	
+	removeClassAnnos(s) : ClassDec(ClassDecHead(annos,a,b,c,d),e){t*} 
+		-> ClassDec(ClassDecHead(newannos,a,b,c,d),e){t*} where
+		<remove-all(s)>annos => newannos

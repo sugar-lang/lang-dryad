@@ -1,0 +1,41 @@
+module org/sugarj/dryad/Hooks
+
+//included dryad hooks
+
+strategies
+	//use "LoadJar" annotation to add additional .jar file to buildpath
+	hook-dryad-init =
+		?[path,imports,type]{t*};
+		where(<fetch-elem(?SingleElemAnno(TypeName(Id("LoadJar")),_))><getAllClassAnnos>type);
+		<makeConc>(imports,<generateJarList>type) => newImports;
+		![path,newImports,<removeClassAnnos(?SingleElemAnno(TypeName(Id("LoadJar")),_))>type]{t*} 
+	
+	//generate list of .jar files to import from @LoadJar annotations
+	generateJarList = 
+		<filter (?SingleElemAnno(TypeName(Id("LoadJar")),_))><getAllClassAnnos <+ ![]>;
+		jdebug(!"filter result");
+		map(\SingleElemAnno(TypeName(Id("LoadJar")),Lit(String([Chars(jarname)]))) -> Jar(<GetSourcePath>jarname)\)
+		  
+	
+	hook-dryad-init = 
+		//fix BC class files
+		?[path,imports,CompilationUnit(Some(PackageDec(_,PackageName(pkg))),_,[cls@ClassFile(_,_,_,_,_,_,_,_,_)])]
+		 ; where(get-annotations => annos)
+		 //extract package name
+		 ; <map(\Id(x) -> x\)>pkg
+		 ; separate-by(|".")
+		 ; <conc>(<id>,["."])
+		 ; concat-strings => interfacePrefix
+		 ; ![path,imports,cls]
+		 //restore annotations
+		 ; <set-annotations>(<id>,annos)
+		 ; setAnno(|InterfacePrefix(interfacePrefix))
+		
+	hook-dryad-final(|args) =
+		//fix BC class files
+		where(<getAnno(?(InterfacePrefix(<id>)))>args => prfx)
+		//check for repetitions
+		; where(not(hasAnno(?InterfacePrefix(_))))
+		; topdown(try(\ThisClass(x) -> ThisClass(<concat-strings>[prfx,x])\))
+		; setAnno(|InterfacePrefix(prfx))
+		
