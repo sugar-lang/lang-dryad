@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoConstructor;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -240,7 +242,10 @@ AbstractBaseProcessor {
 	 * @param sourceFile related source file
 	 * @param environment related environment
 	 */
-	public void init(RelativePath sourceFile, Environment environment) {
+	public void init(Set<RelativePath> sourceFiles, Environment environment) {
+		if (sourceFiles.size() != 1)
+			throw new IllegalArgumentException("Dryad can only compile one source file at a time.");
+
 		//initialize namespace term (getInterpreter() can be used here)
 		termNS = getInterpreter().getFactory().makeAppl(new StrategoConstructor("NoNS", 0));
 		//enable source-path resolution. Requires external definition
