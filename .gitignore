@@ -1,3 +1,5 @@
 language-libraries/dryad/bin
 languages/dryad/.cache
 languages/dryad/bin
+case-studies/dryad/.sugarjcache
+case-studies/dryad/bin
