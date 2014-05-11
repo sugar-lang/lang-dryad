@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoInt;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -68,13 +69,12 @@ public class DryadProcessor extends ExtendedAbstractBaseProcessor {
 	public void init(Set<RelativePath> sourceFiles, Environment environment) {
 		super.init(sourceFiles, environment);
 		this.environment = environment;
-		RelativePath sourceFile = sourceFiles.iterator().next();
 		//Entry point: Processing of new file
 		environment.addToIncludePath(new AbsolutePath(Activator.getPluginPath("/ext")));
 		//create output file (which holds the built file content later)
 		this.outFile = 
 				environment.createOutPath(
-						FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + DryadLanguage.getInstance().getBaseFileExtension()
+						FileCommands.dropExtension(sourceFiles.iterator().next().getRelativePath()) + "." + DryadLanguage.getInstance().getBaseFileExtension()
 						);
 	}
 
