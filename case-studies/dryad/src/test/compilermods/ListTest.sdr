@@ -20,7 +20,7 @@ class ListTest{
         list1 += list2;
         list1 += "somestring";
         list1 += new ArrayList<String>();
-        System.out.println(list1); //["Foo","Bar","Baz","somestring"]
+        System.out.println(list1); //[Foo, Bar, Baz, somestring]
         //list of lists usage of operator
         ArrayList<ArrayList<Integer>> x = new ArrayList<ArrayList<Integer>>();
 		ArrayList<Integer> y = new ArrayList<Integer>();
