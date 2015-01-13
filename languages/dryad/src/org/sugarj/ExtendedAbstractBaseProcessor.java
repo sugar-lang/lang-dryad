@@ -243,8 +243,8 @@ AbstractBaseProcessor {
 	 * @param environment related environment
 	 */
 	public void init(Set<RelativePath> sourceFiles, Environment environment) {
-		if (sourceFiles.size() != 1)
-			throw new IllegalArgumentException("Dryad can only compile one source file at a time.");
+		 if (sourceFiles.size() != 1)
+		      throw new IllegalArgumentException("ExtendedAbstractBaseProcessor can only compile one source file at a time.");
 
 		//initialize namespace term (getInterpreter() can be used here)
 		termNS = getInterpreter().getFactory().makeAppl(new StrategoConstructor("NoNS", 0));

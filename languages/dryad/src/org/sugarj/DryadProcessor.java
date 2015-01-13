@@ -284,7 +284,6 @@ public class DryadProcessor extends ExtendedAbstractBaseProcessor {
 		return factory.makeList(termArgs);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<Path> handleCompileStrategyResult(IStrategoTerm result,
 			Exception ex, Path inputFile) throws SourceCodeException, IOException {

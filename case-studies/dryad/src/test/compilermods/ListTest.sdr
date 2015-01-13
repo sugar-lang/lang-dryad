@@ -1,0 +1,31 @@
+package test.compilermods;
+import test.compilermods.listmod;
+import java.util.ArrayList;
+
+class ListTest{
+    //Example overloading of Addition assignment operator ('+=') for List types
+    public static void main(String[] args){
+        //operator works as expected for non-list types
+        int a = 2;
+        int b = 3;
+        a += b;
+        a += 4;
+        System.out.println(a); //9
+        //list usage of operator
+        ArrayList<String> list1 = new ArrayList<String>();
+        ArrayList<String> list2 = new ArrayList<String>();
+        list1.add("Foo");
+        list2.add("Bar");
+        list2.add("Baz");
+        list1 += list2;
+        list1 += "somestring";
+        list1 += new ArrayList<String>();
+        System.out.println(list1); //[Foo, Bar, Baz, somestring]
+        //list of lists usage of operator
+        ArrayList<ArrayList<Integer>> x = new ArrayList<ArrayList<Integer>>();
+		ArrayList<Integer> y = new ArrayList<Integer>();
+		y += new Integer(5);
+		x += y;
+		System.out.println(x);//[[5]]
+    }
+}

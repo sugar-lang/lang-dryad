@@ -1,0 +1,53 @@
+package test.compilermods;
+sugar listmod{
+    signature constructors
+        InterfaceType : A -> B
+    rules
+        //hook-dryad-emit-java(s) : _ -> <fail> where jdebug(!"hook-dryad-emit-java")
+        
+        //hook-dryad-emit-java(s) : TypeName(_,_) -> <fail> where
+        //    lookup-class; get-superinterfaces-as-type; jdebug(!"superinterfaces")
+
+        //check if current type implements the provided interface
+        has-java-interface(s) : _ -> <id> where
+            get-annos;
+            fetch-elem(?Type(_));
+            ?Type(ClassType(<id>,_));
+            lookup-class;
+            get-superinterfaces-as-type;
+            fetch-elem(s)  
+
+        //get type of invocation construct
+        get-invocation-type : e@Invoke(methodid, args) ->
+            [ 
+                Type(type)
+                , DeclaringClass(invtype)
+                , CompileTimeDeclaration(<get-canonical-name> method)
+                | attrs
+            ]
+        where id
+            ; <dryad-tc-search-class-of-method> methodid => invtype
+            ; <log-lookup-class> invtype => class
+            ; <determine-method-signature(|invtype, class, class)> e => (method, attrs)
+            ; <determine-result-type(|invtype, attrs)> method => type
+        
+        is-java-list : _ -> <id> where
+            has-java-interface(?InterfaceType(TypeName(PackageName([Id("java"),Id("util")]),Id("List")),_))
+        
+        //hook for list1 += val
+        hook-dryad-emit-java(s) : AssignPlus(list,val) -> result where
+            <is-java-list> list;
+            <get-annos>list; fetch-elem(?Type(ClassType(_,Some(TypeArgs([<id>]))))) => listtype;
+            <get-annos>val; fetch-elem(?Type(<id>)) => listtype;
+            !Invoke(Method(MethodName(list,Id("add"))),[val]);
+            <set-annos>(<id>,<get-invocation-type>);
+            emit-java(s) => result
+
+        //hook for list1 += list2
+        hook-dryad-emit-java(s) : AssignPlus(list1,list2) -> result where
+            <is-java-list> list1;
+            <is-java-list> list2;
+            !Invoke(Method(MethodName(list1,Id("addAll"))),[list2]);
+            <set-annos>(<id>,<get-invocation-type>);
+            emit-java(s) => result
+}
