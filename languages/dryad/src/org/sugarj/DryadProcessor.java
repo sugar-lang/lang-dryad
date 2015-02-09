@@ -19,7 +19,7 @@ import org.spoofax.terms.StrategoConstructor;
 import org.spoofax.terms.StrategoList;
 import org.spoofax.terms.StrategoString;
 import org.strategoxt.lang.Strategy;
-import org.sugarj.common.Environment;
+import org.sugarj.baselang.IORelay;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.errors.SourceCodeException;
 import org.sugarj.common.errors.SourceLocation;
@@ -49,7 +49,7 @@ public class DryadProcessor extends ExtendedAbstractBaseProcessor {
 	//Name of namespace
 	private String namespace;
 	//SugarJ Environment for file processing
-	private Environment environment;
+	private IORelay environment;
 
 	@Override
 	public AbstractBaseLanguage getLanguage() {
@@ -66,7 +66,7 @@ public class DryadProcessor extends ExtendedAbstractBaseProcessor {
 	}
 
 	@Override
-	public void init(Set<RelativePath> sourceFiles, Environment environment) {
+	public void init(Set<RelativePath> sourceFiles, IORelay environment) {
 		super.init(sourceFiles, environment);
 		this.environment = environment;
 		//Entry point: Processing of new file

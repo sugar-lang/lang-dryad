@@ -25,7 +25,7 @@ import org.spoofax.terms.StrategoTerm;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.lang.JavaInteropRegisterer;
 import org.strategoxt.lang.Strategy;
-import org.sugarj.common.Environment;
+import org.sugarj.baselang.IORelay;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.errors.SourceCodeException;
 import org.sugarj.common.path.AbsolutePath;
@@ -242,7 +242,7 @@ AbstractBaseProcessor {
 	 * @param sourceFile related source file
 	 * @param environment related environment
 	 */
-	public void init(Set<RelativePath> sourceFiles, Environment environment) {
+	public void init(Set<RelativePath> sourceFiles, IORelay environment) {
 		 if (sourceFiles.size() != 1)
 		      throw new IllegalArgumentException("ExtendedAbstractBaseProcessor can only compile one source file at a time.");
 
