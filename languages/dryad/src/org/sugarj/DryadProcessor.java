@@ -26,11 +26,11 @@ import org.sugarj.common.errors.SourceLocation;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
+import org.sugarj.common.util.Pair;
 import org.sugarj.dryad.Activator;
 import org.sugarj.dryad.strategies.GetJarContent_0_0;
 import org.sugarj.dryad.strategies.ResolveResource_0_0;
 import org.sugarj.strategies.ThrowException_0_1.StrategoCompilationException;
-import org.sugarj.util.Pair;
 
 /**
  * Processor of SugarDryad
